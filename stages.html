@@ -1,0 +1,119 @@
+<html lang="en" class="">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Sans">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/css/datepicker.css">
+    <style class="cp-pen-styles">
+      .container {
+      max-width: 500px;
+      }
+      label {
+      margin-left: 30px;
+      }
+      .datepicker {
+      width: auto;
+      margin: 0 20px 20px 20px;
+      }
+      .datepicker > span:hover {
+      cursor: pointer;
+      }
+      .container {
+      margin-top: 20px;
+      }
+      .datepicker table tr td span {
+      height: 30px;
+      line-height: 30px;
+      }
+      .target {
+      margin: 1rem 0 0 30px;
+      }
+      .target .value {
+      font-weight: 600;
+      margin-left: 1rem;
+      }
+      #error {
+      display: none;
+      }
+      #error.active {
+      display: block;
+      }
+      #error.active ~ .target {
+      display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <label>Start Month:</label>
+      <div class="datepicker input-group date" data-date-format="mm-dd-yyyy">
+        <input class="form-control" id="startDate" type="text" readonly="readonly"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+      </div>
+      <label>End Month:</label>
+      <div class="datepicker input-group date" data-date-format="mm-dd-yyyy">
+        <input class="form-control" id="endDate" type="text" readonly="readonly"><span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+      </div>
+      <div class="label label-danger active" id="error">Error: Start Month &gt;= End Month not allowed</div>
+      <div class="target" id="y13"><span>Current stage in 13 year cycle is:</span><span class="value">Being</span></div>
+      <div class="target" id="y19"><span>Current stage in 19 year cycle is:</span><span class="value">Being</span></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/js/bootstrap-datepicker.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $(".datepicker").datepicker({
+          format: "mm-yyyy",
+          startView: "months",
+          minViewMode: "months",
+          autoclose: true,
+          todayHighlight: true 
+        }).datepicker('update', new Date()).change(function (evt) {
+          $("#error").removeClass("active");
+          updateTarget();
+        });
+        updateTarget();
+      });
+      
+      function updateTarget() {
+        var start = Date.parse($("#startDate").val()),
+        end = Date.parse($("#endDate").val()),
+        stageDurations = [6, 12, 18, 36, 84, 3, 6, 9, 18, 36],
+        stageMonthCount = [0, 6, 18, 36, 72, 156, 159, 165, 174, 192, 228],
+        stageNames = ["Being", "Doing", "Thinking", "Identity", "Skills", "Being in Integration", "Doing in Integration", "Thinking in Integration", "Identitiy in Integration", "Skills in Integration"];
+        if (Date.compare(start, end) >= 0) {
+          $("#error").addClass("active");
+          return;
+        }
+        let diff = monthDiff(start, end),
+        stage13Months = diff % 156 == 0 ? 156 : diff % 156,stage13Index = -1,
+        stage19Months = diff % 228 == 0 ? 228 : diff % 228,stage19Index = -1;
+        for (let i = 0; i < stageMonthCount.length; i++) {
+          if (stage13Months > stageMonthCount[i] && stage13Months <= stageMonthCount[i + 1]) {
+            stage13Index = i;
+          }
+          if (stage19Months > stageMonthCount[i] && stage19Months <= stageMonthCount[i + 1]) {
+            stage19Index = i;
+          }
+        }
+        console.log(stageNames[stage13Index], stageNames[stage19Index]);
+        $("#y13 .value").text(stageNames[stage13Index]);
+        $("#y19 .value").text(stageNames[stage19Index]);
+      
+      }
+      function monthDiff(d1, d2) {
+        var months;
+        months = (d2.getFullYear() - d1.getFullYear()) * 12;
+        months -= d1.getMonth() + 1;
+        months += d2.getMonth() + 1;
+      return months <= 0 ? 0 : months;
+      }
+      //# sourceURL=pen.js
+    </script>
+  </body>
+</html>
